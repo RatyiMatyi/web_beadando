@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Memória</title>
+</head>
+<body>
+    <script>
+// Itt vannak a párok: az egyik fele kép, a másik fele szöveg
+// (a képfájlokat tedd a HTML fájl mellé, vagy írd át a nevüket)
+const parok = [
+    { kep: "Untitled.png", szoveg: "MEGROHAMOZTUK A HUNGARIKUMLIGETET A SRÁCOKKAL! 😮 | Amit ott találtunk jobb lett volna ha nem látjuk." },
+    { kep: "Untitled1.png", szoveg: "ÖSSZEFUTOTTAM AZAHRIAHHAL AZ UTSZÁN? 🤤😯 | PVPMMC - oficel" },
+    { kep: "Untitled2.png", szoveg: "MEGTALÁLTAM PANKIXOT A MC HC VIDEÓMBAN! 🫢" },
+    { kep: "Untitled3.png", szoveg: "bejelenteni szeretnek egy videot. ⚠️ ENGEDJÉTEK MEG H MEGTEGYEM!" },
+    { kep: "Untitled4.png", szoveg: "Meg tbb tartalom negtek, nezoimnek (intro egyveleg megin^_____^[100 subos kölönkiadas])" },
+    { kep: "Untitled5.png", szoveg: "AZAHRIAH RANT (2025 4K)" },
+    { kep: "Untitled6.png", szoveg: "A WALT DISZNI ALTAL KESZITET BEMUTATO FILMEM" },
+    { kep: "Untitled7.png", szoveg: "pvpmmc pvpmmc introja videoja namijen let?!" },
+    { kep: "Untitled8.png", szoveg: "KÁRTUN NETWÖRKKEL KOLLABORÁLTAM - szemelyes elmenyek, tapasztalatok a karton halozatosokkal" },
+    { kep: "Untitled9.png", szoveg: "ELTÖLTÖTTEM 24 ÓRÁT A 2 OKOSSAL! 🤤 | PVPMMC" },
+    { kep: "Untitled10.png", szoveg: "⚠️ ZSOMAC RANT, KISFIAM BELESETT A VÉGKAPUBA JAJJ NE! + EGY KIS BEJELENTÉS – A Clipchampel készült 2" },
+    { kep: "Untitled11.png", szoveg: "2 éves SPECIAL video kulonkiadas elotti szosszenet a nezoknek– A Clipchamppel készült" }
+];
+
+let tabla = [];        // itt tároljuk az összes kártyát
+let elso = -1;         // az első felfordított kártya sorszáma (-1 = még nincs)
+let masodik = -1;      // a második felfordított kártya sorszáma
+let talalt = 0;        // hány párt találtunk meg
+let varakozas = false; // ha igaz, éppen várunk, nem lehet kattintani
+
+// Az egész oldal szövegét középre igazítjuk (cím, üzenet)
+document.body.style.textAlign = "center";
+
+// Cím kiírása az oldalra
+const cim = document.createElement("h1");
+cim.textContent = "Memória";
+document.body.appendChild(cim);
+
+// Üzenet az oldal tetején
+const uzenet = document.createElement("p");
+uzenet.textContent = "Találd meg a párokat!";
+document.body.appendChild(uzenet);
+
+// Létrehozzuk a kártyákat: minden párból egy képes és egy szöveges kártya
+for (let i = 0; i < parok.length; i++) {
+    tabla.push({ par: i, tipus: "kep", tartalom: parok[i].kep, megvan: false });
+    tabla.push({ par: i, tipus: "szoveg", tartalom: parok[i].szoveg, megvan: false });
+}
+
+// Összekeverjük a kártyákat: 200-szor felcserélünk két véletlen kártyát
+for (let k = 0; k < 200; k++) {
+    const a = Math.floor(Math.random() * tabla.length);
+    const b = Math.floor(Math.random() * tabla.length);
+    const csere = tabla[a];
+    tabla[a] = tabla[b];
+    tabla[b] = csere;
+}
+
+// Létrehozzuk a játékteret
+const alap = document.createElement("div");
+alap.id = "alap";
+alap.style.display = "grid";                         // rács elrendezés
+alap.style.gridTemplateColumns = "repeat(6, 200px)"; // 6 oszlop (24 kártya = 4 sor)
+alap.style.gap = "8px";                              // kis hely a kártyák között
+alap.style.width = "1240px";                          // 6*200 + 5*8 = 1240 pixel széles
+alap.style.margin = "0 auto";                        // ettől lesz középen a tábla
+document.body.appendChild(alap);
+
+// Minden kártyához csinálunk egy cellát, kezdetben "?" van rajta
+for (let i = 0; i < tabla.length; i++) {
+    const cella = document.createElement("div");
+    cella.className = "cella";
+    cella.id = "c" + i;
+    cella.textContent = "?";
+
+    // A cella kinézete
+    cella.style.width = "200px";
+    cella.style.height = "200px";
+    cella.style.background = "lightblue";
+    cella.style.fontSize = "18px";
+    cella.style.display = "flex";
+    cella.style.alignItems = "center";
+    cella.style.justifyContent = "center";
+    cella.style.cursor = "pointer";
+
+    cella.setAttribute("onclick", "lepes(this)");
+    alap.appendChild(cella);
+}
+
+// Megmutatja a kártya tartalmát (képet vagy szöveget)
+function felfordit(sorszam) {
+    const cella = document.getElementById("c" + sorszam);
+    cella.textContent = ""; // először letöröljük a "?"-et
+
+    if (tabla[sorszam].tipus === "kep") {
+        // Kép esetén csinálunk egy img elemet
+        const kep = document.createElement("img");
+        kep.src = tabla[sorszam].tartalom;
+        kep.style.width = "200px";
+        kep.style.height = "200px";
+        cella.appendChild(kep);
+    } else {
+        // Szöveg esetén simán kiírjuk
+        cella.textContent = tabla[sorszam].tartalom;
+    }
+}
+
+// Visszafordítja a kártyát (újra "?" lesz rajta)
+function visszafordit(sorszam) {
+    const cella = document.getElementById("c" + sorszam);
+    cella.textContent = "?"; // ez a kép elemet is törli
+}
+
+// Ez fut le, amikor rákattintunk egy kártyára
+function lepes(melyik) {
+    // Az id-ből kivesszük a sorszámot (pl. "c5" -> 5)
+    const sorszam = parseInt(melyik.id.substring(1));
+
+    // Ha várakozunk, nem csinálunk semmit
+    if (varakozas) {
+        return;
+    }
+    // Ha a kártya már megvan, vagy ez már az első felfordított, nem csinálunk semmit
+    if (tabla[sorszam].megvan || sorszam === elso) {
+        return;
+    }
+
+    felfordit(sorszam);
+
+    if (elso === -1) {
+        // Ez volt az első kártya, megjegyezzük
+        elso = sorszam;
+    } else {
+        // Ez volt a második kártya
+        masodik = sorszam;
+        varakozas = true;
+
+        // Egy másodperc múlva megnézzük, hogy pár-e
+        setTimeout(ellenoriz, 1000);
+    }
+}
+
+// Megnézi, hogy a két felfordított kártya pár-e
+function ellenoriz() {
+    if (tabla[elso].par === tabla[masodik].par) {
+        // Pár! Megjegyezzük, hogy megvan, és zöldre színezzük
+        tabla[elso].megvan = true;
+        tabla[masodik].megvan = true;
+        document.getElementById("c" + elso).style.background = "lightgreen";
+        document.getElementById("c" + masodik).style.background = "lightgreen";
+        talalt++;
+    } else {
+        // Nem pár, visszafordítjuk mindkettőt
+        visszafordit(elso);
+        visszafordit(masodik);
+    }
+
+    // Készen állunk a következő lépésre
+    elso = -1;
+    masodik = -1;
+    varakozas = false;
+
+    // Ha minden párt megtaláltunk, vége a játéknak
+    if (talalt === parok.length) {
+        uzenet.textContent = "Gratulálok, nyertél!";
+        setTimeout(() => {
+            window.location.reload();
+        }, 3000);
+    }
+}
+    </script>
+</body>
+</html>
